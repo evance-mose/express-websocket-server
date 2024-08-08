@@ -1,7 +1,6 @@
-import { Router, Response, Request, NextFunction } from "express";
-import {User, Users, UserWithId} from "./users.model";   
-import { InsertOneResult } from "mongodb";
-import { ZodError } from "zod";
+import { Response, Request, NextFunction } from 'express';
+import { User, Users, UserWithId } from './users.model';   
+import { ZodError } from 'zod';
 
 export async function findAll(req: Request, res: Response<UserWithId[]>, next: NextFunction) {
   try {
@@ -12,11 +11,15 @@ export async function findAll(req: Request, res: Response<UserWithId[]>, next: N
   }
 }
 
-export async function createOne(req: Request<{}, InsertOneResult<User>, User>, res: Response<InsertOneResult<User>>, next: NextFunction) {
+export async function createOne(req: Request<{}, UserWithId, User>, res: Response<UserWithId>) {
   try {
-    const result =  await User.parse(req.body);
-    const insertResult = await Users.insertOne(result);
-    res.json(insertResult);
+    const insertResult = await Users.insertOne(req.body);
+    if (insertResult.acknowledged) throw new Error('Failed to insert user');
+    res.json({
+      _id: insertResult.insertedId,
+      ...req.body,
+    });
+    res.status(201);
   } catch (error) {
     if (error instanceof ZodError) {
       res.status(422);

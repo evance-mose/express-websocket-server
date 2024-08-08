@@ -30,7 +30,7 @@ describe('POST /api/v1/users', () => {
     request(app)
       .post('/api/v1/users')
       .set('Accept', 'application/json')
-      .send({username: ''})
+      .send({ username: '' })
       .expect('Content-Type', /json/)
       .expect(422)
       .then ((response) => {
@@ -38,4 +38,21 @@ describe('POST /api/v1/users', () => {
         expect(response.body).toHaveProperty('message');
       }
     ) );
+});
+
+describe('POST /api/v1/users', () => {
+  it('responds with the inserted user',  async () => 
+    request(app)
+      .post('/api/v1/users')
+      .set('Accept', 'application/json')
+      .send({ 
+        username: 'test',
+        status:'online',
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .then((response) => {
+        expect(response.body).toHaveProperty('username');
+        expect(response.body).toHaveProperty('status');
+      }));
 });
